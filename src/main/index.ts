@@ -9,6 +9,7 @@ import {
   Tray,
   Menu,
 } from "electron";
+import Positioner from "electron-positioner";
 
 let tray: Tray | null = null;
 
@@ -23,6 +24,7 @@ const createWindow = () => {
     maximizable: false,
     titleBarStyle: "hidden",
     titleBarOverlay: true,
+    show: false,
     webPreferences: {
       preload: join(__dirname, "preload.js"),
     },
@@ -36,29 +38,27 @@ const createWindow = () => {
     );
   }
 
-  mainWindow.webContents.openDevTools({ mode: "detach" });
+  // mainWindow.webContents.openDevTools({ mode: "detach" });
 
   return mainWindow;
 };
 
 app.on("ready", () => {
   const browserWindow = createWindow();
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "Show Window",
-      click: () => {
-        browserWindow.show();
-        browserWindow.focus();
-      },
-    },
-    {
-      label: "Quit",
-      role: "quit",
-    },
-  ]);
   tray = new Tray("./src/icons/trayTemplate.png");
-  tray.setContextMenu(contextMenu);
-  tray.on("click", () => {});
+  // Otherwise it would show and hide immediately
+  tray.setIgnoreDoubleClickEvents(true);
+  const positioner = new Positioner(browserWindow);
+  tray.on("click", () => {
+    if (!tray) return;
+    if (browserWindow.isVisible()) {
+      return browserWindow.hide();
+    }
+
+    const trayPosition = positioner.calculate("trayCenter", tray.getBounds());
+    browserWindow.setPosition(trayPosition.x, trayPosition.y, true);
+    browserWindow.show();
+  });
   // registers a global shortcut to bring the app to the front
   // and focus it when the user presses CmdOrCtrl+Shift+Alt+C
   globalShortcut.register("CommandOrControl+Shift+Alt+C", () => {
