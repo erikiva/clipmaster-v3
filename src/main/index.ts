@@ -6,7 +6,11 @@ import {
   ipcMain,
   globalShortcut,
   Notification,
+  Tray,
+  Menu,
 } from "electron";
+
+let tray: Tray | null = null;
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -39,6 +43,22 @@ const createWindow = () => {
 
 app.on("ready", () => {
   const browserWindow = createWindow();
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: "Show Window",
+      click: () => {
+        browserWindow.show();
+        browserWindow.focus();
+      },
+    },
+    {
+      label: "Quit",
+      role: "quit",
+    },
+  ]);
+  tray = new Tray("./src/icons/trayTemplate.png");
+  tray.setContextMenu(contextMenu);
+  tray.on("click", () => {});
   // registers a global shortcut to bring the app to the front
   // and focus it when the user presses CmdOrCtrl+Shift+Alt+C
   globalShortcut.register("CommandOrControl+Shift+Alt+C", () => {
