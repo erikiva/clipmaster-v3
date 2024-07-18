@@ -1,5 +1,11 @@
 import { join } from "node:path";
-import { app, BrowserWindow, clipboard, ipcMain } from "electron";
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  ipcMain,
+  globalShortcut,
+} from "electron";
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -30,7 +36,20 @@ const createWindow = () => {
   return mainWindow;
 };
 
-app.on("ready", createWindow);
+app.on("ready", () => {
+  const browserWindow = createWindow();
+  // registers a global shortcut to bring the app to the front
+  // and focus it when the user presses CmdOrCtrl+Shift+Alt+C
+  globalShortcut.register("CommandOrControl+Shift+Alt+C", () => {
+    app.focus();
+    browserWindow.show();
+    browserWindow.focus();
+  });
+});
+
+app.on("quit", () => {
+  globalShortcut.unregisterAll();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
