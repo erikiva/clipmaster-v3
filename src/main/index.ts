@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, clipboard, ipcMain } from "electron";
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -42,4 +42,12 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+ipcMain.on("write-to-clipboard", (_, content: string) => {
+  clipboard.writeText(content);
+});
+
+ipcMain.handle("read-from-clipboard", (_) => {
+  return clipboard.readText();
 });
