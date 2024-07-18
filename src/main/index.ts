@@ -5,6 +5,7 @@ import {
   clipboard,
   ipcMain,
   globalShortcut,
+  Notification,
 } from "electron";
 
 const createWindow = () => {
@@ -44,6 +45,16 @@ app.on("ready", () => {
     app.focus();
     browserWindow.show();
     browserWindow.focus();
+  });
+  globalShortcut.register("CommandOrControl+Shift+Alt+X", () => {
+    let content = clipboard.readText();
+    content = content.toUpperCase();
+    clipboard.writeText(content);
+    new Notification({
+      title: "Capitalized Clipboard",
+      subtitle: "Copied to Clipboard",
+      body: content,
+    }).show();
   });
 });
 
